@@ -13,11 +13,12 @@ t = 0:dt:t_end;
 numSamp = length(t);
 
 % Monte Carlo Initialization
-numSims = 1000;
+numSims = 10000;
 
 % Noise & Frequency Initialization
 sigma = 0.3; % deg/s
-omega = 450; % degs/s
+freq = 2;
+omega = freq * (2 * pi) ; % rads/s
 
 % Arbitrary Coefficient Initialization
 a = 3;
@@ -25,6 +26,7 @@ b = 10;
 
 % Least Squares Initialization
 estSamps = 10; % # of samples used in estimate
+R = sigma * eye(estSamps);
 
 % Preallocation
 r = zeros(numSamp,1); 
@@ -38,19 +40,23 @@ for i = 1:numSims
 
     for k = 1:numSamp
        
-        r(k) = 100 * sind(omega * t(k));
+        r(k) = 100 * sin(omega * t(k));
     
-        g(k) = a * r(k) + b + n(k);
+        g(k) = a * r(k) + b + n(k); % degs/s
     
     end
 
 H = [r(1:estSamps) ones(estSamps,1)];
-est(i,:) = (H' * H)^-1 * H' * g(1:estSamps);
+est(i,:) = (H' * R^-1 * H)^-1 * H' * R^-1 * g(1:estSamps);
 
+P = (H' * R^-1 * H)^-1 ;
 end
 
 mean_est = mean(est);
-std_est = std(est);
+std_est = std(est); % Monte Carlo Standard Deviation
+
+std_a = sqrt(P(1,1)); % Theoretical Standard Deviation
+std_b = sqrt(P(2,2));
 
 figure
 plot(1:numSims, est(:,1), '*')
@@ -87,7 +93,8 @@ numSims = 1000;
 
 % Noise & Frequency Initialization
 sigma = 0.3; % deg/s
-omega = 450; % degs/s
+freq = 2;
+omega = freq * (2 * pi) ; % rads/s
 
 % Arbitrary Coefficient Initialization
 a = 3;
