@@ -10,13 +10,14 @@ close all
 dt = 0.1;
 t_end = 30;
 t = 0:dt:t_end;
-numSamp = length(t);
+numSamps = length(t);
 
 % Monte Carlo Initialization
-numSims = 10000;
+numSims = 1000;
 
 % Noise & Frequency Initialization
 sigma = 0.3; % deg/s
+var = sigma^2;
 freq = 2;
 omega = freq * (2 * pi) ; % rads/s
 
@@ -26,19 +27,19 @@ b = 10;
 
 % Least Squares Initialization
 estSamps = 10; % # of samples used in estimate
-R = sigma * eye(estSamps);
+R = var * eye(estSamps);
 
 % Preallocation
-r = zeros(numSamp,1); 
-g = zeros(numSamp,1);
+r = zeros(numSamps,1); 
+g = zeros(numSamps,1);
 est = zeros(numSims,2);
 
 
 for i = 1:numSims
 
-    n = sigma * randn(numSamp,1);
+    n = sigma * randn(numSamps,1);
 
-    for k = 1:numSamp
+    for k = 1:numSamps
        
         r(k) = 100 * sin(omega * t(k));
     
@@ -47,7 +48,7 @@ for i = 1:numSims
     end
 
 H = [r(1:estSamps) ones(estSamps,1)];
-est(i,:) = (H' * R^-1 * H)^-1 * H' * R^-1 * g(1:estSamps);
+est(i,:) = (H' * H)^-1 * H' * g(1:estSamps);
 
 P = (H' * R^-1 * H)^-1 ;
 end
@@ -86,13 +87,14 @@ clearvars
 dt = 0.1;
 t_end = 300;
 t = 0:dt:t_end;
-numSamp = length(t);
+numSamps = length(t);
 
 % Monte Carlo Initialization
 numSims = 1000;
 
 % Noise & Frequency Initialization
 sigma = 0.3; % deg/s
+var = sigma^2;
 freq = 2;
 omega = freq * (2 * pi) ; % rads/s
 
@@ -102,32 +104,37 @@ b = 10;
 
 % Least Squares Initialization
 estSamps = 1000; % # of samples used in estimate
+R = var * eye(estSamps);
 
 % Preallocation
-r = zeros(numSamp,1); 
-g = zeros(numSamp,1);
+r = zeros(numSamps,1); 
+g = zeros(numSamps,1);
 est = zeros(numSims,2);
 
 
 for i = 1:numSims
 
-    n = sigma * randn(numSamp,1);
+    n = sigma * randn(numSamps,1);
 
-    for k = 1:numSamp
+    for k = 1:numSamps
        
-        r(k) = 100 * sind(omega * t(k));
+        r(k) = 100 * sin(omega * t(k));
     
-        g(k) = a * r(k) + b + n(k);
+        g(k) = a * r(k) + b + n(k); % degs/s
     
     end
 
 H = [r(1:estSamps) ones(estSamps,1)];
 est(i,:) = (H' * H)^-1 * H' * g(1:estSamps);
 
+P = (H' * R^-1 * H)^-1 ;
 end
 
 mean_est = mean(est);
-std_est = std(est);
+std_est = std(est); % Monte Carlo Standard Deviation
+
+std_a = sqrt(P(1,1)); % Theoretical Standard Deviation
+std_b = sqrt(P(2,2));
 
 figure
 plot(1:numSims, est(:,1), '*')
@@ -153,13 +160,11 @@ clearvars
 
 %% Problem 3 - Part D
 
-%TODO: MODIFY FOR RLS ALGORITHIM
-
 % Time Initialization
 dt = 0.1;
 t_end = 30;
 t = 0:dt:t_end;
-numSamp = length(t);
+numSamps = length(t);
 
 % Monte Carlo Initialization
 numSims = 1000;
@@ -176,25 +181,27 @@ b = 10;
 estSamps = 10; % # of samples used in estimate
 
 % Preallocation
-r = zeros(numSamp,1); 
-g = zeros(numSamp,1);
+r = zeros(numSamps,1); 
+g = zeros(numSamps,1);
 est = zeros(numSims,2);
 
 
 for i = 1:numSims
 
-    n = sigma * randn(numSamp,1);
 
-    for k = 1:numSamp
+    for k = 1:numSamps
        
         r(k) = 100 * sind(omega * t(k));
     
         g(k) = a * r(k) + b + n(k);
+
+        est = est + P * ( eye(2) + H' * P )^1 * (g(k) - H' * est);
+
+        P = P - P * H * ( eye(2) + H' * P * H); %TODO: MODIFY FOR RLS ALGORITHIM
+
+        
     
     end
-
-H = [r(1:estSamps) ones(estSamps,1)];
-est(i,:) = (H' * H)^-1 * H' * g(1:estSamps);
 
 end
 
