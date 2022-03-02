@@ -160,50 +160,82 @@ clearvars
 
 %% Problem 3 - Part D
 
-% Time Initialization
-dt = 0.1;
-t_end = 30;
-t = 0:dt:t_end;
-numSamps = length(t);
+% % Time Initialization
+% dt = 0.1;
+% t_end = 30;
+% t = 0:dt:t_end;
+% numSamps = length(t);
+% 
+% % Monte Carlo Initialization
+% numSims = 1000;
+% 
+% % Noise & Frequency Initialization
+% sigma = 0.3; % deg/s
+% omega = 450; % degs/s
+% 
+% % Arbitrary Coefficient Initialization
+% a = 3;
+% b = 10;
+% 
+% % Least Squares Initialization
+% estSamps = 10; % # of samples used in estimate
+% 
+% % Preallocation
+% r = zeros(numSamps,1); 
+% g = zeros(numSamps,1);
+% est = zeros(numSims,2);
+% 
+% 
+% for i = 1:numSims
+% 
+% 
+%     for k = 1:numSamps
+%        
+%         r(k) = 100 * sind(omega * t(k));
+%     
+%         g(k) = a * r(k) + b + n(k);
+% 
+%         est = est + P * ( eye(2) + H' * P )^1 * (g(k) - H' * est);
+% 
+%         P = P - P * H * ( eye(2) + H' * P * H); %TODO: MODIFY FOR RLS ALGORITHIM
+% 
+%         
+%     
+%     end
+% 
+% end
+% 
+% mean_est = mean(est);
+% std_est = std(est);
 
-% Monte Carlo Initialization
-numSims = 1000;
+%% Problem 4 - Part A
 
-% Noise & Frequency Initialization
-sigma = 0.3; % deg/s
-omega = 450; % degs/s
+numd = 0.25 * [1 -0.8];
+dend = [1 -1.9 0.95];
 
-% Arbitrary Coefficient Initialization
-a = 3;
-b = 10;
+u = randn(1000,1);
+numSamps = length(u);
 
-% Least Squares Initialization
-estSamps = 10; % # of samples used in estimate
+y = dlsim(numd, dend, u);
 
-% Preallocation
-r = zeros(numSamps,1); 
-g = zeros(numSamps,1);
-est = zeros(numSims,2);
+y_ = zeros(numSamps,1);
+
+A = -0.25;
+B = -A * 0.8;
+C = -1.90; 
+D = 0.95;
+
+% for i = 3:numSamps
+% 
+%     y_(i) = A * u(i-1) + B * u(i-2) - C * y_(i-1) - D * y_(i-2);
+% 
+% end
+
+sigma = 0.01;
+noise = sigma * randn(1000,1);
+Y_ = y_ + noise;
+Y = y + noise;
 
 
-for i = 1:numSims
-
-
-    for k = 1:numSamps
-       
-        r(k) = 100 * sind(omega * t(k));
-    
-        g(k) = a * r(k) + b + n(k);
-
-        est = est + P * ( eye(2) + H' * P )^1 * (g(k) - H' * est);
-
-        P = P - P * H * ( eye(2) + H' * P * H); %TODO: MODIFY FOR RLS ALGORITHIM
 
         
-    
-    end
-
-end
-
-mean_est = mean(est);
-std_est = std(est);
