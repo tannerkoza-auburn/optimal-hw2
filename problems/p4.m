@@ -15,18 +15,11 @@ y = dlsim(numd, dend, u);
 
 y_ = zeros(numSamps,1);
 
-A = -0.25;
-B = -A * 0.8;
-C = -1.90; 
-D = 0.95;
-
-% for i = 3:numSamps
-% 
-%     y_(i) = A * u(i-1) + B * u(i-2) - C * y_(i-1) - D * y_(i-2);
-% 
-% end
-
 sigma = 0.01;
 noise = sigma * randn(1000,1);
 Y_ = y_ + noise;
 Y = y + noise;
+
+H = [u(2:end-1) -u(1:end-2) y(2:end-1) -y(1:end-2)];
+
+est = (H' * H)^-1 * H' * y(3:end);
