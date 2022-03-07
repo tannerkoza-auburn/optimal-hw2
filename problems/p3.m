@@ -246,9 +246,9 @@ ylabel('Standard Deviation')
 legend('a Error Std.','b Error Std.')
 
 ax(2) = subplot(2,1,2);
-plot(t,abs(mean_est_a - a),'Parent', ax(2))
+plot(t,abs(a - mean_est_a),'Parent', ax(2))
 hold on
-plot(t,abs(mean_est_b - b), 'Parent', ax(2))
+plot(t,abs(b - mean_est_b), 'Parent', ax(2))
 title('Actual Error of Estimate')
 xlabel('Time (s)')
 ylabel('Error (Residual)')
